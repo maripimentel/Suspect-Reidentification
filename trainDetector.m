@@ -95,5 +95,5 @@ p = X_train * hog.theta;
 % Recognize as a pedestrian if the confidence is over 0.
 numRight = sum((p > 0) == y_train);
 
-fprintf('\nTraining accuracy lightness: (%d / %d) %.2f%%\n', numRight, length(y_train), numRight / length(y_train) * 100.0);
+fprintf('\nTraining accuracy: (%d / %d) %.2f%%\n', numRight, length(y_train), numRight / length(y_train) * 100.0);
 

@@ -114,30 +114,30 @@ fprintf('Found %d / %d people (%.2f%%), with %d false positives.\n', ...
         totalVisibleFound / numVisiblePeople * 100.0, ...
         numFalsePositives);
 
-%%
-% Write out the image with detection hits drawn on it.
-
-% "Plot" the image.
-hold off;
-imagesc(img);
-hold on;
-
-% Draw each of the detection hits.
-for i = 1 : size(resultRects, 1)
-    rect = resultRects(i, :);
-    
-    % Use this code to skip over drawing the false positives.
-    % Or, comment it out to draw the false positives as blue rectangles.
-    if rect(end) == 0
-        continue;
-    end
-    
-    color = 'b';
-    % If the match is a good one (or an optional one), color it red.
-    if (rect(end) ~= 0)
-        color = 'r';
-    end
-    
-    % Draw the results.
-    drawRectangle(resultRects(i, :), color);
-end
+% %%
+% % Write out the image with detection hits drawn on it.
+% 
+% % "Plot" the image.
+% hold off;
+% imagesc(img);
+% hold on;
+% 
+% % Draw each of the detection hits.
+% for i = 1 : size(resultRects, 1)
+%     rect = resultRects(i, :);
+%     
+%     % Use this code to skip over drawing the false positives.
+%     % Or, comment it out to draw the false positives as blue rectangles.
+%     if rect(end) == 0
+%         continue;
+%     end
+%     
+%     color = 'b';
+%     % If the match is a good one (or an optional one), color it red.
+%     if (rect(end) ~= 0)
+%         color = 'r';
+%     end
+%     
+%     % Draw the results.
+%     drawRectangle(resultRects(i, :), color);
+% end
