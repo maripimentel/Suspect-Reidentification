@@ -4,6 +4,9 @@
 %   image and the image searched.
 
 %% Load data
+
+clear;
+
 % Read the image searched.
 files = getImagesInDir('./Images/Validation/', true);
 fprintf('Making the test for %d images.', length(files));
@@ -12,18 +15,18 @@ fprintf('Making the test for %d images.', length(files));
 % Read the original image.
 imgOriginal = imread('./INRIAPerson/test_64x128_H96/pos/crop001501g.png');
 
-for k = 1 : length(files)
+for cont = 1 : length(files)
     %% Running over the images 
     % Get the next filename.
-    imgFile = char(files(k));
+    imgFile = char(files(cont));
 
     % Print the current iteration (using some clever formatting to
     % overwrite).
-    fprintf('\nImage %d:\n', k);
+    fprintf('\nImage %d:\n', cont);
     %fprintf('%s\n', imgFile);
     % Load the image into a matrix.
     img = imread(imgFile);
-    img = imresize(img,[130 66]);
+    %img = imresize(img,[130 66]);
 
     %Converting to LAB
     colorTransform = makecform('srgb2lab');
@@ -34,14 +37,17 @@ for k = 1 : length(files)
     load('hog_model.mat');
 
     %% Calculates the color histograms and similaritys
-    runExampleSearch();
-
+    imgSave = img;
+    resultRects = runExampleSearch(img);
+    img = imgSave;
+    
     % Calculates the histogram for the original image.
     histLOriginal = imhist(imgOriginal(:,:,1));
     histAOriginal = imhist(imgOriginal(:,:,2));   
     histBOriginal = imhist(imgOriginal(:,:,3));
 
     % Calculates the histogram for all detected boxes.
+    clear similarity;
     for j = 1 : size(resultRects, 1)
         rect = resultRects(j, :);
 
@@ -165,7 +171,7 @@ for k = 1 : length(files)
     title('Top1 - B Histogram');
     
     addpath('./export_fig/');
-    export_fig(sprintf('./Test/test%d_histograms.png', k));
+    export_fig(sprintf('./Test/test%d_histograms.png', cont));
     
     %Converting to RGB
     colorTransform = makecform('lab2srgb');
@@ -193,5 +199,5 @@ for k = 1 : length(files)
     legend('Top 1', 'Top 2 to 5');
 
     addpath('./export_fig/');
-    export_fig(sprintf('./Test/test%d_images.png', k), '-native');
+    export_fig(sprintf('./Test/test%d_images.png', cont), '-native');
 end

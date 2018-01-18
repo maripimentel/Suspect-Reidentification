@@ -1,3 +1,4 @@
+function [resultRects] = runExampleSearch(img)
 % runExampleSearch.m
 %   This script applies a pre-trained HOG detector to a sample validation 
 %   image, reports the detector accuracy, and displays the image with true 
@@ -16,13 +17,13 @@ load('hog_model.mat');
 % positives, so I'm using a higher threshold value here.
 hog.threshold = 0.4;
 
-% Read in the image to be searched.
-img = imread('./Images/Validation/IMG_9997.jpg');
-%img = imresize(img,[130 66]);
-
-%Converting to LAB
-colorTransform = makecform('srgb2lab');
-img = applycform(img, colorTransform);
+% % Read in the image to be searched.
+% img = imread('./Images/Validation/IMG_9997.jpg');
+% %img = imresize(img,[130 66]);
+% 
+% %Converting to LAB
+% colorTransform = makecform('srgb2lab');
+% img = applycform(img, colorTransform);
 
 tic();
 
@@ -141,3 +142,5 @@ fprintf('Found %d / %d people (%.2f%%), with %d false positives.\n', ...
 %     % Draw the results.
 %     drawRectangle(resultRects(i, :), color);
 % end
+
+end 
