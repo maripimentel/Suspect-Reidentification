@@ -1,4 +1,4 @@
-function [resultRects] = runExampleSearch(img)
+function [resultRects] = runExampleSearch(img, cont)
 % runExampleSearch.m
 %   This script applies a pre-trained HOG detector to a sample validation 
 %   image, reports the detector accuracy, and displays the image with true 
@@ -48,7 +48,9 @@ fprintf('Image search took %.2f seconds\n', elapsed);
 % Validate the search results.
 
 % Load the annotations file.
-goodRects = load('./Images/Validation/IMG_9997_annotations.csv');
+annotFiles = getAnnotationsInDir('./Images/Validation/', true);
+annotFile = char(annotFiles(cont));
+goodRects = load(annotFile);
 
 % Column 5 indicates whether the annotated rectangle is required or 
 % optional.	Person who are in full view are required, persons who are
@@ -115,7 +117,7 @@ fprintf('Found %d / %d people (%.2f%%), with %d false positives.\n', ...
         totalVisibleFound / numVisiblePeople * 100.0, ...
         numFalsePositives);
 
-% %%
+%%
 % % Write out the image with detection hits drawn on it.
 % 
 % % "Plot" the image.
