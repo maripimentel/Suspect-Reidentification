@@ -15,7 +15,9 @@ fprintf('Making the test for %d images.', length(files));
 % Read the original image.
 imgOriginal = imread('./INRIAPerson/test_64x128_H96/pos/crop001501g.png');
 
-for cont = 1 : length(files)
+
+%PARA O MEU PC, O FOR TEM QUE COMEÇAR DO 5, MAS O PADRÃO É 1
+for cont = 5 : length(files)
     %% Running over the images 
     % Get the next filename.
     imgFile = char(files(cont));
@@ -128,11 +130,45 @@ for cont = 1 : length(files)
         else
             similarity(j) = 0;
         end 
-
+        
+        %Calculates the similarity with the mode of histograms
+         modeL = 0;
+         modeA = 0;
+         modeB = 0;
+        
+        %Calculates the mode of the original image
+        modeAOriginal = mode(histA);
+        modeBOriginal = mode(histB);
+        
+        %Calculates the mode of all the other images
+        modeA = mode(histA);
+        modeB = mode(histB);
+        
+        likeness_modeA = abs(modeAOriginal-modeA);
+        likeness_modeB = abs(modeBOriginal-modeB);
+        
+        %Calculates the relation between the plans A and B, for further
+        %ponderation
+        if(modeAOriginal>modeBOriginal)
+            mode_ratio = modeAOriginal/modeBOriginal;
+            likeness_mode = likeness_modeA*mode_ratio+likeness_modeB;
+        elseif(modeAOriginal<modeBOriginal)
+            mode_ratio = modeAOriginal\modeBOriginal;
+            likeness_mode = likeness_modeB*mode_ratio+likeness_modeA;
+        else
+            likeness_mode = likeness_modeA+likeness_modeB;
+        end
+        
+        similarity_mode(j) = likeness_mode;
     end
-
+    
+    %Results matrix from the classical method
     [result, index] = sort(similarity(:), 'descend');
     bestIndex = index(1);
+    
+    %Results matrix from the mode method
+    [result_mode, index_mode] = sort(similarity_mode(:), 'ascend');
+    bestIndex_mode = index_mode(1);
 
     %% Draw the best result
 
@@ -148,7 +184,7 @@ for cont = 1 : length(files)
     imhist(imgOriginal(:,:,3));
     title('Suspect - B Histogram');
 
-
+    %Results from the classical method
     rect = resultRects(bestIndex, :);
     if (rect(1)+rect(3)>img_size(1))
         x = rect(1):img_size(1);
@@ -162,16 +198,39 @@ for cont = 1 : length(files)
     end
     subplot(3,2,2);
     imhist(img(x,y,1));
-    title('Top1 - L Histogram');
+    title('Top1 - L Histogram (Classic)');
     subplot(3,2,4);
     imhist(img(x,y,2));   
-    title('Top1 - A Histogram');
+    title('Top1 - A Histogram (Classic)');
     subplot(3,2,6);
     imhist(img(x,y,3));
-    title('Top1 - B Histogram');
+    title('Top1 - B Histogram (Classic)');
+    
+    %Results from the mode method
+    rect_mode = resultRects(bestIndex_mode, :);
+    if (rect_mode(1)+rect_mode(3)>img_size(1))
+        x_mode = rect_mode(1):img_size(1);
+    else
+        x_mode = rect_mode(1):(rect_mode(1)+rect_mode(3));
+    end
+    if (rect_mode(2)+rect_mode(4)>img_size(2))
+        y_mode = rect_mode(2):img_size(2);
+    else
+        y_mode = rect_mode(2):(rect_mode(2)+rect_mode(4));
+    end
+    subplot(3,2,2);
+    imhist(img(x_mode,y_mode,1));
+    title('Top1 - L Histogramb(Mode)');
+    subplot(3,2,4);
+    imhist(img(x_mode,y_mode,2));   
+    title('Top1 - A Histogram (Mode)');
+    subplot(3,2,6);
+    imhist(img(x_mode,y_mode,3));
+    title('Top1 - B Histogram (Mode)');
     
     addpath('./export_fig/');
-    export_fig(sprintf('./Test/test%d_histograms.png', cont));
+    export_fig(sprintf('./Test/test%d_histograms_classic.png', cont));
+    export_fig(sprintf('./Test/test%d_histograms_mode.png', cont));
     
     %Converting to RGB
     colorTransform = makecform('lab2srgb');
@@ -185,19 +244,41 @@ for cont = 1 : length(files)
     title('Suspect');
     subplot(1,3,[2 3]);
     imagesc(img);
-    title('Reidentification top 5');
+    title('Reidentification top 5 (Classic)');
     hold on;
     plot(0,0,'r');
     plot(0,0,'g');
 
-    % Draw the results.
+    % Draw the results by classical method.
     for i = 2:5
         drawRectangle(resultRects(index(i), :), 'g');
     end
     drawRectangle(resultRects(bestIndex, :), 'r');
 
-    legend('Top 1', 'Top 2 to 5');
+    legend('Top 1 (Classic)', 'Top 2 to 5 (Classic)');
+    
+    % Draw the results by mode method
+    
+    %Plot the images
+    figure
+    subplot(1,3,1);
+    imagesc(imgOriginal);
+    title('Suspect');
+    subplot(1,3,[2 3]);
+    imagesc(img);
+    title('Reidentification top 5 (Mode)');
+    hold on;
+    plot(0,0,'b');
+    plot(0,0,'y');
+    
+    for i = 2:5
+        drawRectangle(resultRects(index_mode(i), :), 'b');
+    end
+    drawRectangle(resultRects(bestIndex_mode, :), 'y');
+
+    legend('Top 1 (Mode)', 'Top 2 to 5 (Mode)');
 
     addpath('./export_fig/');
-    export_fig(sprintf('./Test/test%d_images.png', cont), '-native');
+    export_fig(sprintf('./Test/test%d_images_classic.png', cont), '-native');
+    export_fig(sprintf('./Test/test%d_images_mode.png', cont), '-native');
 end
