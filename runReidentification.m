@@ -15,7 +15,8 @@ fprintf('Making the test for %d images.', length(files));
 % Read the original image.
 imgOriginal = imread('./INRIAPerson/test_64x128_H96/pos/crop001501g.png');
 
-for cont = 1 : length(files)
+cont = 8;
+%for cont = 1 : length(files)
     %% Running over the images 
     % Get the next filename.
     imgFile = char(files(cont));
@@ -48,6 +49,7 @@ for cont = 1 : length(files)
 
     % Calculates the histogram for all detected boxes.
     clear similarity;
+    clear similarityMode;
     for j = 1 : size(resultRects, 1)
         rect = resultRects(j, :);
 
@@ -74,7 +76,8 @@ for cont = 1 : length(files)
             histL = imhist(img(x,y,1));
             histA = imhist(img(x,y,2));   
             histB = imhist(img(x,y,3));
-
+            
+            %% Using Cossine to get the Similaritys
             % Calculates de similaritys between the histograms using the
             % cossine technique.
             productL = 0;
@@ -126,18 +129,56 @@ for cont = 1 : length(files)
             likeness = 100 - difference;
 
             similarity(j) = likeness;
+            
+            %% Using Mode to get the similaritys
+            % Calculates de similaritys between the histograms using the
+            % mode technique.
+            modeL = 0;
+            modeA = 0;
+            modeB = 0;
+
+            %Calculates the mode of the original image
+            modeAOriginal = mode(histA);
+            modeBOriginal = mode(histB);
+
+            %Calculates the mode of all the other images
+            modeA = mode(histA);
+            modeB = mode(histB);
+            
+            %Calculates the relation between the plans A and B, for further
+            %ponderation
+            if(modeAOriginal>modeBOriginal)
+                modeRatio = modeAOriginal/modeBOriginal;
+                likenessMode = likenessA*modeRatio+likenessB;
+            elseif(modeAOriginal<modeBOriginal)
+                modeRatio = modeAOriginal\modeBOriginal;
+                likenessMode = likenessB*modeRatio+likenessA;
+            else
+                likenessMode = likenessA+likenessB;
+            end
+            
+            similarityMode(j) = likenessMode;
+ 
+            
         else
             similarity(j) = 0;
         end 
 
     end
 
+    %Results matrix from the classical method
     [result, index] = sort(similarity(:), 'descend');
     bestIndex = index(1);
+    
+    %Results matrix from the mode method
+    [resultMode, indexMode] = sort(similarityMode(:), 'descend');
+    bestIndexMode = indexMode(1);
 
     %% Draw the best result
 
-    % Plot the histograms.
+    %% Plot the histograms.
+    
+    % Cossine Technique.
     figure;
     subplot(3,2,1);
     imhist(imgOriginal(:,:,1));
@@ -172,14 +213,53 @@ for cont = 1 : length(files)
     title('Top1 - B Histogram');
     
     addpath('./export_fig/');
-    export_fig(sprintf('./Test/test%d_histograms.png', cont));
+    export_fig(sprintf('./Test/test%d_histograms_classic.png', cont));
+    
+    % Mode Techinique
+    figure;
+    subplot(3,2,1);
+    imhist(imgOriginal(:,:,1));
+    title('Suspect - L Histogram');
+    subplot(3,2,3);
+    imhist(imgOriginal(:,:,2));
+    title('Suspect - A Histogram');
+    subplot(3,2,5);
+    imhist(imgOriginal(:,:,3));
+    title('Suspect - B Histogram');
+    
+    %Results from the mode method
+    rectMode = resultRects(bestIndexMode, :);
+    if (rectMode(1)+rectMode(3)>img_size(1))
+        xMode = rectMode(1):img_size(1);
+    else
+        xMode = rectMode(1):(rectMode(1)+rectMode(3));
+    end
+    if (rectMode(2)+rectMode(4)>img_size(2))
+        yMode = rectMode(2):img_size(2);
+    else
+        yMode = rectMode(2):(rectMode(2)+rectMode(4));
+    end
+    subplot(3,2,2);
+    imhist(img(xMode,yMode,1));
+    title('Top1 - L Histogramb(Mode)');
+    subplot(3,2,4);
+    imhist(img(xMode,yMode,2));   
+    title('Top1 - A Histogram (Mode)');
+    subplot(3,2,6);
+    imhist(img(xMode,yMode,3));
+    title('Top1 - B Histogram (Mode)');
+    
+    addpath('./export_fig/');
+    export_fig(sprintf('./Test/test%d_histograms_mode.png', cont));
     
     %Converting to RGB
     colorTransform = makecform('lab2srgb');
     img = applycform(img, colorTransform);
     imgOriginal = applycform(imgOriginal, colorTransform);
 
-    %Plot the images
+    %% Plot the comparing images
+    
+    % Cossine Techinique
     figure;
     subplot(1,3,1);
     imagesc(imgOriginal);
@@ -201,4 +281,62 @@ for cont = 1 : length(files)
 
     addpath('./export_fig/');
     export_fig(sprintf('./Test/test%d_images.png', cont), '-native');
-end
+    
+    % Mode Techinique
+    figure
+    subplot(1,3,1);
+    imagesc(imgOriginal);
+    title('Suspect');
+    subplot(1,3,[2 3]);
+    imagesc(img);
+    title('Reidentification top 5 (Mode)');
+    hold on;
+    plot(0,0,'b');
+    plot(0,0,'o');
+    
+    for i = 2:5
+        drawRectangle(resultRects(indexMode(i), :), 'o');
+    end
+    drawRectangle(resultRects(bestIndexMode, :), 'b');
+
+    legend('Top 1 (Mode)', 'Top 2 to 5 (Mode)');
+    
+    addpath('./export_fig/');
+    export_fig(sprintf('./Test/test%d_images_mode.png', cont), '-native');
+    
+    %% Plot the result image
+    
+    % Cossine Technique
+    figure;
+    imagesc(img);
+    title('Reidentification top 5');
+    hold on;
+    plot(0,0,'r');
+    plot(0,0,'g');
+    
+    % Draw the results.
+    for i = 2:5
+        drawRectangle(resultRects(index(i), :), 'g');
+    end
+    drawRectangle(resultRects(bestIndex, :), 'r');
+
+    legend('Top 1', 'Top 2 to 5');
+    
+    %Mode Technique
+    figure;
+    imagesc(img);
+    title('Reidentification top 5');
+    hold on;
+    plot(0,0,'b');
+    plot(0,0,'o');
+    
+    % Draw the results.
+    for i = 2:5
+        drawRectangle(resultRects(indexMode(i), :), 'o');
+    end
+    drawRectangle(resultRects(bestIndexMode, :), 'b');
+
+    legend('Top 1', 'Top 2 to 5');
+    
+    
+%end
