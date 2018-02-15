@@ -15,8 +15,8 @@ fprintf('Making the test for %d images.', length(files));
 % Read the original image.
 imgOriginal = imread('./INRIAPerson/test_64x128_H96/pos/crop001501g.png');
 
-cont = 8;
-%for cont = 1 : length(files)
+for cont = 1 : length(files)
+    if (cont == 4 || cont == 8 || cont == 9)
     %% Running over the images 
     % Get the next filename.
     imgFile = char(files(cont));
@@ -204,13 +204,13 @@ cont = 8;
     end
     subplot(3,2,2);
     imhist(img(x,y,1));
-    title('Top1 - L Histogram');
+    title('Top1 - L Histogram (Media)');
     subplot(3,2,4);
     imhist(img(x,y,2)); 
-    title('Top1 - A Histogram');
+    title('Top1 - A Histogram (Media)');
     subplot(3,2,6);
     imhist(img(x,y,3));
-    title('Top1 - B Histogram');
+    title('Top1 - B Histogram (Media)');
     
     addpath('./export_fig/');
     export_fig(sprintf('./Test/test%d_histograms_classic.png', cont));
@@ -241,7 +241,7 @@ cont = 8;
     end
     subplot(3,2,2);
     imhist(img(xMode,yMode,1));
-    title('Top1 - L Histogramb(Mode)');
+    title('Top1 - L Histogram (Mode)');
     subplot(3,2,4);
     imhist(img(xMode,yMode,2));   
     title('Top1 - A Histogram (Mode)');
@@ -266,7 +266,7 @@ cont = 8;
     title('Suspect');
     subplot(1,3,[2 3]);
     imagesc(img);
-    title('Reidentification top 5');
+    title('Reidentification top 5 (Media)');
     hold on;
     plot(0,0,'r');
     plot(0,0,'g');
@@ -292,10 +292,10 @@ cont = 8;
     title('Reidentification top 5 (Mode)');
     hold on;
     plot(0,0,'b');
-    plot(0,0,'o');
+    plot(0,0,'y');
     
     for i = 2:5
-        drawRectangle(resultRects(indexMode(i), :), 'o');
+        drawRectangle(resultRects(indexMode(i), :), 'y');
     end
     drawRectangle(resultRects(bestIndexMode, :), 'b');
 
@@ -328,15 +328,15 @@ cont = 8;
     title('Reidentification top 5');
     hold on;
     plot(0,0,'b');
-    plot(0,0,'o');
+    plot(0,0,'y');
     
     % Draw the results.
     for i = 2:5
-        drawRectangle(resultRects(indexMode(i), :), 'o');
+        drawRectangle(resultRects(indexMode(i), :), 'y');
     end
     drawRectangle(resultRects(bestIndexMode, :), 'b');
 
     legend('Top 1', 'Top 2 to 5');
     
-    
-%end
+    end
+end
