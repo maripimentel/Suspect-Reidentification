@@ -15,8 +15,8 @@ fprintf('Making the test for %d images.', length(files));
 % Read the original image.
 imgOriginal = imread('./INRIAPerson/test_64x128_H96/pos/crop001501g.png');
 
-for cont = 1 : length(files)
-    if (cont == 4 || cont == 8 || cont == 9)
+cont = 8;
+%for cont = 1 : length(files)
     %% Running over the images 
     % Get the next filename.
     imgFile = char(files(cont));
@@ -127,9 +127,13 @@ for cont = 1 : length(files)
             likeness = 0*likenessL + likenessA + likenessB;
             difference = likeness*100*2/(2*pi);
             likeness = 100 - difference;
-
-            similarity(j) = likeness;
             
+            %Searching for NAN and changing them to 0.
+            if(isnan(likeness)~=1)
+                similarity(j) = likeness;
+            else
+                similarity(j) = 0;
+            end
             %% Using Mode to get the similaritys
             % Calculates de similaritys between the histograms using the
             % mode technique.
@@ -159,9 +163,14 @@ for cont = 1 : length(files)
             
             similarityMode(j) = likenessMode;
  
-            
+            %Searching for NAN and changing them to 0.
+            if(isnan(likenessMode)~=1)
+                similarityMode(j) = likenessMode;
+            else
+                similarityMode(j) = 0;
+            end
         else
-            similarity(j) = 0;
+            similarityMode(j) = 0;
         end 
 
     end
@@ -204,13 +213,13 @@ for cont = 1 : length(files)
     end
     subplot(3,2,2);
     imhist(img(x,y,1));
-    title('Top1 - L Histogram (Media)');
+    title('Top1 - L Histogram');
     subplot(3,2,4);
     imhist(img(x,y,2)); 
-    title('Top1 - A Histogram (Media)');
+    title('Top1 - A Histogram');
     subplot(3,2,6);
     imhist(img(x,y,3));
-    title('Top1 - B Histogram (Media)');
+    title('Top1 - B Histogram');
     
     addpath('./export_fig/');
     export_fig(sprintf('./Test/test%d_histograms_classic.png', cont));
@@ -241,7 +250,7 @@ for cont = 1 : length(files)
     end
     subplot(3,2,2);
     imhist(img(xMode,yMode,1));
-    title('Top1 - L Histogram (Mode)');
+    title('Top1 - L Histogramb(Mode)');
     subplot(3,2,4);
     imhist(img(xMode,yMode,2));   
     title('Top1 - A Histogram (Mode)');
@@ -266,7 +275,7 @@ for cont = 1 : length(files)
     title('Suspect');
     subplot(1,3,[2 3]);
     imagesc(img);
-    title('Reidentification top 5 (Media)');
+    title('Reidentification top 5');
     hold on;
     plot(0,0,'r');
     plot(0,0,'g');
@@ -291,13 +300,13 @@ for cont = 1 : length(files)
     imagesc(img);
     title('Reidentification top 5 (Mode)');
     hold on;
-    plot(0,0,'b');
-    plot(0,0,'y');
+    plot(0,0,'r');
+    plot(0,0,'g');
     
     for i = 2:5
-        drawRectangle(resultRects(indexMode(i), :), 'y');
+        drawRectangle(resultRects(indexMode(i), :), 'g');
     end
-    drawRectangle(resultRects(bestIndexMode, :), 'b');
+    drawRectangle(resultRects(bestIndexMode, :), 'r');
 
     legend('Top 1 (Mode)', 'Top 2 to 5 (Mode)');
     
@@ -327,16 +336,16 @@ for cont = 1 : length(files)
     imagesc(img);
     title('Reidentification top 5');
     hold on;
-    plot(0,0,'b');
-    plot(0,0,'y');
+    plot(0,0,'r');
+    plot(0,0,'g');
     
     % Draw the results.
     for i = 2:5
-        drawRectangle(resultRects(indexMode(i), :), 'y');
+        drawRectangle(resultRects(indexMode(i), :), 'g');
     end
-    drawRectangle(resultRects(bestIndexMode, :), 'b');
+    drawRectangle(resultRects(bestIndexMode, :), 'r');
 
     legend('Top 1', 'Top 2 to 5');
     
-    end
-end
+    
+%end
