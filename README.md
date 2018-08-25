@@ -1,8 +1,7 @@
 # Suspect-Reidentification
 Research project on Computer Vision from the University of Brasilia.
 
-Authors: Alexandre Saran Rodrigues
-         Mariana Pimentel Martins da Silva
+Authors: Alexandre Saran Rodrigues and Mariana Pimentel Martins da Silva
          
 Oriented by: Díbio Leandro Borges
 
